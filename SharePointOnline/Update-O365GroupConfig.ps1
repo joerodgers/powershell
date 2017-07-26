@@ -43,9 +43,10 @@ $directorySettings = Get-AzureADDirectorySetting | ? { $_.DisplayName -eq "Group
  
 if( -not $directorySettings )
 {
-    # create the settings from the template 
+    # get the template 
     $template = Get-AzureADDirectorySettingTemplate | ? {$_.DisplayName -eq 'Group.Unified'}
  
+    # create the settings from the template 
     $directorySetting = $template.CreateDirectorySetting()
     New-AzureADDirectorySetting -DirectorySetting $directorySetting
 
