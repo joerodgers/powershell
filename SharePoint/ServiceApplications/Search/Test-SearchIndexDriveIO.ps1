@@ -17,6 +17,7 @@ History
 ----------------------------------------------------------
  08-02-2017 - Created from SearchBenchmarkWithSQLIO
  08-03-2017 - Added ability to archive the perf logs prior to data cleanup
+ 08-03-2017 - Fixed a bug with .dat file creation
 
 ==============================================================#>
 
@@ -47,7 +48,6 @@ $indexServerInfo = @(
 
 
 <############    YOU SHOULD NOT HAVE TO MODIFY ANYTHING BELOW THIS POINT    ############>
-
 
 function Initialize-IndexServer
 {
@@ -118,7 +118,8 @@ function Initialize-IndexServer
                     if( -not (Test-Path -Path $datFilePath -PathType Leaf) )
                     {
                         # no existing .dat file, create one
-                        Start-Process -FilePath "FSUTIL.EXE" -ArgumentList "file createnew $datFilePath $($($_.DATFileSize) * 1GB)" -Wait
+                        Start-Process -FilePath "FSUTIL.EXE" -ArgumentList "file createnew    $datFilePath $($($_.DATFileSize) * 1GB)" -Wait
+                        Start-Process -FilePath "FSUTIL.EXE" -ArgumentList "file setvaliddata $datFilePath $($($_.DATFileSize) * 1GB)" -Wait
                     }
                     elseif ( (Get-Item -Path $datFilePath).Length -ne ($_.DATFileSize * 1GB) )
                     {
@@ -176,7 +177,6 @@ function Initialize-IndexServer
         }
     }
 }
-
 function Start-IndexServerPerformanceTest
 {
     <#
@@ -260,7 +260,6 @@ function Start-IndexServerPerformanceTest
         }
     }
 }
-
 function Read-PerformanceTestLogs
 {
     <#
@@ -596,7 +595,6 @@ function New-HTMLReport
         $sb.ToString()
     } 
 }
-
 function Remove-PerformanceTestDirectory
 {
     <#
@@ -720,7 +718,8 @@ function Compress-PerformanceTestLogs
     }}
 
 
-# init the servers
+
+    # init the servers
 
     $initializationResult = Initialize-IndexServer -ServerInfo $indexServerInfo
     $initializationResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Initialization Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
