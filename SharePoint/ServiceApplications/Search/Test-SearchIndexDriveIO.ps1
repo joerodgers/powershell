@@ -1,19 +1,30 @@
 <#
-     This sample code is provided for the purpose of illustration only and is not intended to be used in a production environment.  
-     THIS SAMPLE CODE AND ANY RELATED INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, 
-     INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.  
+
+ Microsoft provides programming examples for illustration only, without warranty either expressed or
+ implied, including, but not limited to, the implied warranties of merchantability and/or fitness 
+ for a particular purpose. 
  
- ----------------------------------------------------------
- History
- ----------------------------------------------------------
- 08-03-2015 - Created from SearchBenchmarkWithSQLIO
+ This sample assumes that you are familiar with the programming language being demonstrated and the 
+ tools used to create and debug procedures. Microsoft support professionals can help explain the 
+ functionality of a particular procedure, but they will not modify these examples to provide added 
+ functionality or construct procedures to meet your specific needs. if you have limited programming 
+ experience, you may want to contact a Microsoft Certified Partner or the Microsoft fee-based consulting 
+ line at (800) 936-5200. 
 
- ==============================================================#>
 
+----------------------------------------------------------
+History
+----------------------------------------------------------
+ 08-02-2017 - Created from SearchBenchmarkWithSQLIO
+ 08-03-2017 - Added ability to archive the perf logs prior to data cleanup
 
- # name and location of the HTML report
+==============================================================#>
+
+# name and location of the HTML report
 $reportFile = "SearchIndexDriveIOTestResults$($(Get-Date).ToString('yyyy-MM-dd')).html"
 
+# path must exist, can be local or UNC.  If you don't want to backup the perf logs, leave this empty or null
+$logArchiveDirectoryPath = "\\dc01\_backups"
 
 # index server info.  These directories will be deleted after the script finishes
 $indexServerInfo = @( 
@@ -208,7 +219,7 @@ function Start-IndexServerPerformanceTest
 
                     foreach( $perfTest in $performanceTests.GetEnumerator() )
                     {
-                        # "$($perfTest.Value)" | Add-Content -Path "$logPath\trace.txt" # dump the sqlio.exe args to a trace file 
+                        "$($_.TestPath)\SQLIO.exe $($perfTest.Value)" | Add-Content -Path "$logPath\$($env:COMPUTERNAME)_sqlio_execution_args.txt" # dump the sqlio.exe args to a trace file 
 
                         Start-Process -FilePath "$($_.TestPath)\SQLIO.exe" -ArgumentList $perfTest.Value -RedirectStandardOutput "$logPath\$($env:COMPUTERNAME)_$($perfTest.Key).txt" -Wait -WorkingDirectory $_.TestPath
                         # Start-Sleep -Seconds 60 # Note: Microsoft recommends that you allow time between each sqlio command to let the I/O system return to an idle state
@@ -653,7 +664,60 @@ function Remove-PerformanceTestDirectory
         }
     }}
 
+function Compress-PerformanceTestLogs
+{
+    <#
+    .Synopsis
+       Compresses the performance logs
 
+    .EXAMPLE
+        Compress-PerformanceTestLogs -ServerInfo $indexServerInfo -ArchiveDirectoryPath "\\server\archive"
+    #>
+    [cmdletbinding()]
+    param
+    (
+        [parameter(Mandatory=$true)][object[]]$ServerInfo,
+        [parameter(Mandatory=$false)][string]$ArchiveDirectoryPath
+    )
+
+    try
+    {
+        Add-Type -AssemblyName "System.IO.Compression.FileSystem"
+
+        $ServerInfo | % { 
+
+            $computerName = $_.ServerName
+
+            # unc path to logs directory
+            $uncPathToLogFiles = "\\$($_.ServerName)\$($_.TestPath)\LogFiles".Replace(":", "$")
+            
+            # unc path to archive directory
+            $zipFilePath = Join-Path -Path $ArchiveDirectoryPath -ChildPath "$($computerName)_LogFileArchive_$($(Get-Date).ToString('yyyy-MM-dd_hhmmss')).zip"
+
+            if( Test-Path -Path $ArchiveDirectoryPath )
+            {
+                [System.IO.Compression.ZipFile]::CreateFromDirectory( $uncPathToLogFiles, $zipFilePath )
+            }
+            else
+            {
+                throw "Directory Not Found: $ArchiveDirectoryPath"
+            }
+
+            return New-Object PSObject @{
+                Computer = $computerName
+                Success  = $true
+                Details  = ""
+            }
+        }
+    }
+    catch
+    {
+        return New-Object PSObject @{
+            Computer = $computerName
+            Success  = $false
+            Details  = $_.Exception
+        }
+    }}
 
 
 # init the servers
@@ -669,11 +733,13 @@ function Remove-PerformanceTestDirectory
     $executionResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Execution Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
     Write-Host "$(Get-Date) - Performance Test Execution Complete" -ForegroundColor Green
 
+
 # collect the test results 
 
     $performanceTestResults = Read-PerformanceTestLogs -ServerInfo $indexServerInfo
     $performanceTestResults | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Data Collection Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
     Write-Host "$(Get-Date) - Performance Test Data Collection Complete" -ForegroundColor Green
+
 
 # collect the server hardware specs
 
@@ -681,10 +747,26 @@ function Remove-PerformanceTestDirectory
     $hardwareSpecifications | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Hardware Data Collection Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; }
     Write-Host "$(Get-Date) - Hardware Data Collection Complete" -ForegroundColor Green
 
+
 # build an HTML report
 
     New-HTMLReport -PerformanceTestResults $performanceTestResults -HardwareSpecifications $hardwareSpecifications | Out-File -FilePath $reportFile
     Write-Host "$(Get-Date) - Report Generation Complete - $reportFile" -ForegroundColor Green
+
+
+# archive the performance logs 
+
+    if( $logArchiveDirectoryPath -and (Test-Path -Path $logArchiveDirectoryPath -PathType Container) )
+    {
+        $compressionResults = Compress-PerformanceTestLogs -ServerInfo $indexServerInfo -ArchiveDirectoryPath $logArchiveDirectoryPath
+        $compressionResults | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Archival of the performance logs failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
+        Write-Host "$(Get-Date) - Log file compression complete." -ForegroundColor Green
+    }
+    elseif ($logArchiveDirectoryPath)
+    {
+        Write-Host "$(Get-Date) - Log archive path '$logArchiveDirectoryPath' does not exist, performance logs will be deleted." -ForegroundColor Yellow
+    }
+
 
 # cleanup test data
 
