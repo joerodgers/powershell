@@ -1,12 +1,43 @@
+<<<<<<< HEAD
+=======
+<#
+
+ Microsoft provides programming examples for illustration only, without warranty either expressed or
+ implied, including, but not limited to, the implied warranties of merchantability and/or fitness 
+ for a particular purpose. 
+ 
+ This sample assumes that you are familiar with the programming language being demonstrated and the 
+ tools used to create and debug procedures. Microsoft support professionals can help explain the 
+ functionality of a particular procedure, but they will not modify these examples to provide added 
+ functionality or construct procedures to meet your specific needs. if you have limited programming 
+ experience, you may want to contact a Microsoft Certified Partner or the Microsoft fee-based consulting 
+ line at (800) 936-5200. 
+
+
+----------------------------------------------------------
+History
+----------------------------------------------------------
+ 08-02-2017 - Created from SearchBenchmarkWithSQLIO
+ 08-03-2017 - Added ability to archive the perf logs prior to data cleanup
+ 08-03-2017 - Fixed a bug with .dat file creation
+
+==============================================================#>
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 
 # name and location of the HTML report
 $reportFile = "SearchIndexDriveIOTestResults$($(Get-Date).ToString('yyyy-MM-dd')).html"
 
+<<<<<<< HEAD
 
 # path must exist, can be local or UNC.  If you don't want to backup the perf logs, leave this empty or null
 $logArchiveDirectoryPath = "\\dc01\_backups"
 
 
+=======
+# path must exist, can be local or UNC.  If you don't want to backup the perf logs, leave this empty or null
+$logArchiveDirectoryPath = "\\dc01\_backups"
+
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 # index server info.  These directories will be deleted after the script finishes
 $indexServerInfo = @( 
     
@@ -23,14 +54,20 @@ $indexServerInfo = @(
         TestDuration = 10 # seconds 
         DATFileSize  = 1  # GB
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 )
 
 
 
 <############    YOU SHOULD NOT HAVE TO MODIFY ANYTHING BELOW THIS POINT    ############>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 function Initialize-IndexServer
 {
     <#
@@ -45,13 +82,20 @@ function Initialize-IndexServer
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
+<<<<<<< HEAD
         #[parameter(Mandatory=$true)][object[]]$Session
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     )
 
     try
     {
+<<<<<<< HEAD
         # Invoke-Command -Session $Session -ErrorAction Stop  -ScriptBlock {
         Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop  -ScriptBlock {
+=======
+        Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop -ScriptBlock {
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
             param
             (
                 [parameter(Mandatory=$true)][object[]]$ServerInfo
@@ -161,7 +205,10 @@ function Initialize-IndexServer
         }
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 function Start-IndexServerPerformanceTest
 {
     <#
@@ -175,13 +222,20 @@ function Start-IndexServerPerformanceTest
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
+<<<<<<< HEAD
         # [parameter(Mandatory=$true)][object[]]$Session
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     )
     
     try
     {
+<<<<<<< HEAD
         # Invoke-Command -Session $Session -ErrorAction Stop  -ScriptBlock {
         Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop  -ScriptBlock {
+=======
+        Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop -ScriptBlock {
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
             param
             (
                 [parameter(Mandatory=$true)][object[]]$ServerInfo
@@ -247,7 +301,10 @@ function Start-IndexServerPerformanceTest
         }
     }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 function Read-PerformanceTestLogs
 {
     <#
@@ -261,6 +318,7 @@ function Read-PerformanceTestLogs
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
+<<<<<<< HEAD
         #[parameter(Mandatory=$true)][object[]]$Session
     )
 
@@ -325,6 +383,13 @@ function Read-PerformanceTestLogs
     try
     {
         Invoke-Command -Session $Session -ErrorAction Stop  -ScriptBlock {
+=======
+    )
+
+    try
+        {
+        Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop -ScriptBlock {
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
             param
             (
                 [parameter(Mandatory=$true)][object[]]$ServerInfo
@@ -362,7 +427,11 @@ function Read-PerformanceTestLogs
                             }
                             "*_100mb-write.txt"
                             {
+<<<<<<< HEAD
                                 $performanceResults.Write_100mb = $content | Select-String "MBs/sec" | % { [int]$_.ToString().Replace("MBs/sec: ", "") }
+=======
+                                $performanceResults.Write_100mb = $content | Select-String "MBs/Sec" | % { [int]$_.ToString().Replace("MBs/sec: ", "") }
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
                             }
                             "*_256k-write.txt"
                             {
@@ -370,7 +439,11 @@ function Read-PerformanceTestLogs
                             }
                             "*_64k-read.txt"
                             {
+<<<<<<< HEAD
                                 $performanceResults.Read_64K    = $content | Select-String "IOs/sec" | % { [int]$_.ToString().Replace("IOs/sec: ", "") }
+=======
+                                $performanceResults.Read_64K    = $content | Select-String "Ios/Sec" | % { [int]$_.ToString().Replace("IOs/sec: ", "") }
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
                             }
                         } 
                     }
@@ -401,9 +474,13 @@ function Read-PerformanceTestLogs
             Success  = $false
             Details  = $_.Exception.Message
         }
+<<<<<<< HEAD
     }
     #>
 }
+=======
+    }}
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 
 function Get-HardwareSpecifications
 {
@@ -418,6 +495,7 @@ function Get-HardwareSpecifications
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
+<<<<<<< HEAD
         #[parameter(Mandatory=$true)][object[]]$Session
     )
     
@@ -457,6 +535,13 @@ function Get-HardwareSpecifications
     try
     {
         Invoke-Command -Session $Session -ErrorAction Stop  -ScriptBlock {
+=======
+    )
+    
+    try
+    {
+        Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop -ScriptBlock {
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
             param
             (
                 [parameter(Mandatory=$true)][object[]]$ServerInfo
@@ -467,8 +552,13 @@ function Get-HardwareSpecifications
                 try
                 {
                     $hardwareSpecifications = New-Object PSObject -Property @{
+<<<<<<< HEAD
                         TotalRAM          = (Get-WMIObject -Class Win32_PhysicalMemory | Measure-Object -Property Capacity                  -Sum).Sum / 1GB
                         LogicalProcessors = (Get-WMIObject -Class Win32_Processor      | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+=======
+                        TotalRAM          = (Get-WMIObject -Class Win32_PhysicalMemory| Measure-Object -Property Capacity                  -Sum).Sum / 1GB
+                        LogicalProcessors = (Get-WMIObject -Class Win32_Processor     | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
                         DiskInfo          = @()
                         Success           = $true
                         Details           = ""
@@ -510,9 +600,13 @@ function Get-HardwareSpecifications
             Success  = $false
             Details  = $_.Exception.Message
         }
+<<<<<<< HEAD
     }
     #>
 }
+=======
+    }}
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 
 function New-HTMLReport
 {
@@ -656,12 +750,21 @@ function New-HTMLReport
         $sb.AppendFormat( $headerFormat, "Computer", "64KB Read (IOPS)", "256KB Write (IOPS)", "100MB Read(MB/s)", "100MB Write(MB/s)", "Test Details", "Hardware", "Disk Information") | Out-Null
         $sb.AppendFormat( $rowFormat,    "Recommeded Minimum", 300, 100, 200, 200, "", "", "" ) | Out-Null
 
+<<<<<<< HEAD
         foreach( $performanceTestResult in $PerformanceTestResults | SORT ServerName )
         {
             $hardwareSpecification = $HardwareSpecifications | ? { $_.ServerName -eq $performanceTestResult.ServerName }
 
             $sb.AppendFormat( $rowFormat, 
                 $performanceTestResult.ServerName, 
+=======
+        foreach( $performanceTestResult in $PerformanceTestResults | SORT PSComputerName )
+        {
+            $hardwareSpecification = $HardwareSpecifications | ? { $_.PSComputerName -eq $performanceTestResult.PSComputerName }
+
+            $sb.AppendFormat( $rowFormat, 
+                $performanceTestResult.PSComputerName, 
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
                 (ConvertTo-ColorCodedTable -PropertyName "Read_64K"    -PropertyValue $performanceTestResult.Read_64K),
                 (ConvertTo-ColorCodedTable -PropertyName "Write_256k"  -PropertyValue $performanceTestResult.Write_256k),
                 (ConvertTo-ColorCodedTable -PropertyName "Read_100mb"  -PropertyValue $performanceTestResult.Read_100mb),
@@ -680,7 +783,10 @@ function New-HTMLReport
         $sb.ToString()
     } 
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 function Remove-PerformanceTestDirectory
 {
     <#
@@ -694,6 +800,7 @@ function Remove-PerformanceTestDirectory
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
+<<<<<<< HEAD
         #[parameter(Mandatory=$true)][object[]]$Session
     )
 
@@ -718,6 +825,13 @@ function Remove-PerformanceTestDirectory
     try
     {
         Invoke-Command -Session $Session -ErrorAction Stop  -ScriptBlock {
+=======
+    )
+
+    try
+        {
+        Invoke-Command -ComputerName $ServerInfo.ServerName -ErrorAction Stop -ScriptBlock {
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
             param
             (
                 [parameter(Mandatory=$true)][object[]]$ServerInfo
@@ -765,9 +879,13 @@ function Remove-PerformanceTestDirectory
             Success  = $false
             Details  = $_.Exception.Message
         }
+<<<<<<< HEAD
     }
     #>
 }
+=======
+    }}
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
 
 function Compress-PerformanceTestLogs
 {
@@ -824,6 +942,7 @@ function Compress-PerformanceTestLogs
         }
     }}
 
+<<<<<<< HEAD
 function Initialize-PSSession
 {
     <#
@@ -845,6 +964,12 @@ function Initialize-PSSession
 # init the servers
 
     Write-Host "$(Get-Date) - Server Initialization Starting" -ForegroundColor Green
+=======
+
+
+    # init the servers
+
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     $initializationResult = Initialize-IndexServer -ServerInfo $indexServerInfo
     $initializationResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Initialization Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
     Write-Host "$(Get-Date) - Server Initialization Complete" -ForegroundColor Green
@@ -852,7 +977,10 @@ function Initialize-PSSession
 
 # execute the tests
 
+<<<<<<< HEAD
     Write-Host "$(Get-Date) - Performance Test Execution Starting" -ForegroundColor Green
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     $executionResult = Start-IndexServerPerformanceTest -ServerInfo $indexServerInfo
     $executionResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Execution Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
     Write-Host "$(Get-Date) - Performance Test Execution Complete" -ForegroundColor Green
@@ -860,7 +988,10 @@ function Initialize-PSSession
 
 # collect the test results 
 
+<<<<<<< HEAD
     Write-Host "$(Get-Date) - Performance Test Data Collection Starting" -ForegroundColor Green
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     $performanceTestResults = Read-PerformanceTestLogs -ServerInfo $indexServerInfo
     $performanceTestResults | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Data Collection Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
     Write-Host "$(Get-Date) - Performance Test Data Collection Complete" -ForegroundColor Green
@@ -868,7 +999,10 @@ function Initialize-PSSession
 
 # collect the server hardware specs
 
+<<<<<<< HEAD
     Write-Host "$(Get-Date) - Hardware Data Collection Starting" -ForegroundColor Green
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     $hardwareSpecifications = Get-HardwareSpecifications -ServerInfo $indexServerInfo
     $hardwareSpecifications | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Hardware Data Collection Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; }
     Write-Host "$(Get-Date) - Hardware Data Collection Complete" -ForegroundColor Green
@@ -876,7 +1010,10 @@ function Initialize-PSSession
 
 # build an HTML report
 
+<<<<<<< HEAD
     Write-Host "$(Get-Date) - Report Generation Starting" -ForegroundColor Green
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
     New-HTMLReport -PerformanceTestResults $performanceTestResults -HardwareSpecifications $hardwareSpecifications | Out-File -FilePath $reportFile
     Write-Host "$(Get-Date) - Report Generation Complete - $reportFile" -ForegroundColor Green
 
@@ -885,7 +1022,10 @@ function Initialize-PSSession
 
     if( $logArchiveDirectoryPath -and (Test-Path -Path $logArchiveDirectoryPath -PathType Container) )
     {
+<<<<<<< HEAD
         Write-Host "$(Get-Date) - Log file compression staring." -ForegroundColor Green
+=======
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
         $compressionResults = Compress-PerformanceTestLogs -ServerInfo $indexServerInfo -ArchiveDirectoryPath $logArchiveDirectoryPath
         $compressionResults | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Archival of the performance logs failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
         Write-Host "$(Get-Date) - Log file compression complete." -ForegroundColor Green
@@ -898,6 +1038,7 @@ function Initialize-PSSession
 
 # cleanup test data
 
+<<<<<<< HEAD
     Write-Host "$(Get-Date) - Performance Test Data Deletion Starting" -ForegroundColor Green
     $cleanupResult = Remove-PerformanceTestDirectory -ServerInfo $indexServerInfo
     $cleanupResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Data Deletion Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
@@ -905,3 +1046,9 @@ function Initialize-PSSession
     
 
 
+=======
+    $cleanupResult = Remove-PerformanceTestDirectory -ServerInfo $indexServerInfo
+    $cleanupResult | ? { -not $_.Success } | % { Write-Host "$(Get-Date) - Performance Test Data Deletion Failed on server: '$($_.Computer)'`nException Details: $($_.Details)" -ForegroundColor Red; exit }
+    Write-Host "$(Get-Date) - Performance Test Data Deletion Complete" -ForegroundColor Green
+    
+>>>>>>> 75f28e5a83b647b861e6c0d7e6112159093e7f19
