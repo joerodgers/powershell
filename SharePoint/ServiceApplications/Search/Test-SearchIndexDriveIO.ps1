@@ -28,6 +28,8 @@ $indexServerInfo = @(
 
 
 
+<############    YOU SHOULD NOT HAVE TO MODIFY ANYTHING BELOW THIS POINT    ############>
+
 
 function Initialize-IndexServer
 {
@@ -766,6 +768,7 @@ function Remove-PerformanceTestDirectory
     }
     #>
 }
+
 function Compress-PerformanceTestLogs
 {
     <#
