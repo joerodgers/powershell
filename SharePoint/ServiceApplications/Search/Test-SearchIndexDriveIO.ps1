@@ -7,6 +7,7 @@ History
  08-03-2017 - Added ability to archive the perf logs prior to data cleanup
  08-03-2017 - Fixed a bug with .dat file creation
  08-14-2017 - Removed some PSSession calls to reduce chances of remote connetion failures
+ 08-16-2017 - Minor code cleanup
 
 ==============================================================#>
 
@@ -56,7 +57,6 @@ function Initialize-IndexServer
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
-        #[parameter(Mandatory=$true)][object[]]$Session
     )
 
     try
@@ -272,7 +272,6 @@ function Read-PerformanceTestLogs
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
-        #[parameter(Mandatory=$true)][object[]]$Session
     )
 
     foreach( $info in $ServerInfo )
@@ -347,7 +346,6 @@ function Get-HardwareSpecifications
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
-        #[parameter(Mandatory=$true)][object[]]$Session
     )
     
     foreach ($info in $ServerInfo )
@@ -564,7 +562,6 @@ function Remove-PerformanceTestDirectory
     param
     (
         [parameter(Mandatory=$true)][object[]]$ServerInfo
-        #[parameter(Mandatory=$true)][object[]]$Session
     )
 
     foreach ($info in $ServerInfo )
@@ -576,7 +573,7 @@ function Remove-PerformanceTestDirectory
 
             if( Test-Path -Path $uncPathToLogFiles )
             {
-                #Remove-Item -Path $uncPathToLogFiles -Force -Recurse                      
+                Remove-Item -Path $uncPathToLogFiles -Force -Recurse                      
             }
         }
         catch
@@ -640,23 +637,6 @@ function Compress-PerformanceTestLogs
             Details  = $_.Exception
         }
     }}
-
-function Initialize-PSSession
-{
-    <#
-    .Synopsis
-
-    .EXAMPLE
-
-    #>
-    [cmdletbinding()]
-    param
-    (
-        [parameter(Mandatory=$true)][object[]]$ServerInfo
-    )
-
-    New-PSSession -ComputerName $ServerInfo.ServerName -ErrorAction Stop
-}
 
 
 # init the servers
