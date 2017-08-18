@@ -62,7 +62,7 @@ if($webApplication)
         $peoplePickerSearchActiveDirectoryDomain.ShortDomainName = $domain.ShortDomainName
         $peoplePickerSearchActiveDirectoryDomain.CustomFilter    = $domain.CustomFilter
                 
-        if( -not $domain.LoginName )
+        if( $domain.LoginName )
         {
             # make sure the AppCredentialKey is set, we need this to encrypt the domain password
             if(Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$((Get-SPFarm).BuildVersion.Major).0\Secure" -Name "AppCredentialKey" -ErrorAction SilentlyContinue)
