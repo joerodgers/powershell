@@ -24,8 +24,8 @@ function Get-CustomResultSource
     <#
     .SYNOPSIS
 
-       This cmdlet will return SiteUrl, Name, CreatedDate, Status and IsDefault value for each custom search resource source for
-       the specificed Site.
+       This cmdlet will return Site Url, Web Url, Name, Creation Date, Status and IsDefault value for each custom search resource source for
+       the specificed site collection.
 
     .EXAMPLE
         
@@ -48,7 +48,8 @@ function Get-CustomResultSource
 
     begin
     {
-        $level  = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::SPSite
+        $siteLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::SPSite
+        $webLevel  = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::SPWeb
         $defaultSource = $null
     }
     process
@@ -56,15 +57,29 @@ function Get-CustomResultSource
         # we can't read from readlocked sites, so skip them
         if (-not $site.IsReadLocked )
         {
-            $owner  = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner( $level, $site.RootWeb )
+            $owner  = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner( $siteLevel, $site.RootWeb )
             $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter( $owner )
-            $filter.IncludeHigherLevel = $false # hide all SSA scoped result sources
+            $filter.IncludeHigherLevel = $false
 
             $federationManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($SearchServiceApplication)
-            $sources = $federationManager.ListSourcesWithDefault( $filter, $false, [ref]$defaultSource )
+            $siteSources = $federationManager.ListSourcesWithDefault( $filter, $false, [ref]$defaultSource )
 
             # filter out all built in and non-site level result sources
-            $sources | ? { -not $_.BuiltIn -and $_.Owner.Level -eq $level } | SELECT @{ Name="SiteUrl"; Expression={ $site.Url}}, Name, CreatedDate, @{ Name="Status"; Expression={ if ($_.Active) { return "Active"}else{ return "Inactive"} }}, @{ Name="IsDefault"; Expression={ $_.Id -eq $defaultSource.Id}}
+            $siteSources | ? { -not $_.BuiltIn -and $_.Owner.Level -eq $siteLevel } | SELECT @{ Name="SiteUrl"; Expression={ $site.Url}}, @{ Name="WebUrl"; Expression={ $site.Url}}, Name, CreatedDate, @{ Name="Status"; Expression={ if ($_.Active) { return "Active"}else{ return "Inactive"} }}, @{ Name="IsDefault"; Expression={ $_.Id -eq $defaultSource.Id}}
+
+
+            foreach ($web in $site.AllWebs | ? { -not $_.IsAppWeb })
+            {
+                $owner  = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner( $webLevel, $web )
+                $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter( $owner )
+                $filter.IncludeHigherLevel = $false
+
+                $federationManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($SearchServiceApplication)
+                $webSources = $federationManager.ListSourcesWithDefault( $filter, $false, [ref]$defaultSource )
+
+                # filter out all built in and non-site level result sources
+                $webSources | ? { -not $_.BuiltIn -and $_.Owner.Level -eq $webLevel } | SELECT @{ Name="SiteUrl"; Expression={ $site.Url}}, @{ Name="WebUrl"; Expression={ $web.Url}}, Name, CreatedDate, @{ Name="Status"; Expression={ if ($_.Active) { return "Active"}else{ return "Inactive"} }}, @{ Name="IsDefault"; Expression={ $_.Id -eq $defaultSource.Id}}
+            }
         }
     }
     end
@@ -82,6 +97,6 @@ $ssa = Get-SPEnterpriseSearchServiceApplication | SELECT -First 1
 Get-SPSite -Limit All | % { $customResultSources += Get-CustomResultSource -Site $_ -SearchServiceApplication $ssa }
 
 # save the results to the ULS logs directory in CSV format
-$customResultSources | Export-Csv -Path "$($(Get-SPDiagnosticConfig).LogLocation)\CustomResultSources$($(Get-Date).ToString('yyyyMMdd')).csv" -NoTypeInformation
+$customResultSources  | Export-Csv -Path "$($(Get-SPDiagnosticConfig).LogLocation)\CustomResultSources$($(Get-Date).ToString('yyyyMMdd')).csv" -NoTypeInformation
 
 
