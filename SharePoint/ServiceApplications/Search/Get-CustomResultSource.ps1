@@ -77,7 +77,7 @@ function Get-CustomResultSource
                 $federationManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($SearchServiceApplication)
                 $webSources = $federationManager.ListSourcesWithDefault( $filter, $false, [ref]$defaultSource )
 
-                # filter out all built in and non-site level result sources
+                # filter out all built in and non-web level result sources
                 $webSources | ? { -not $_.BuiltIn -and $_.Owner.Level -eq $webLevel } | SELECT @{ Name="SiteUrl"; Expression={ $site.Url}}, @{ Name="WebUrl"; Expression={ $web.Url}}, Name, CreatedDate, @{ Name="Status"; Expression={ if ($_.Active) { return "Active"}else{ return "Inactive"} }}, @{ Name="IsDefault"; Expression={ $_.Id -eq $defaultSource.Id}}
             }
         }
